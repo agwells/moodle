@@ -1,0 +1,6 @@
+[submodule "mod/assignment/type/mahara"]
+	path = mod/assignment/type/mahara
+	url = git@github.com:agwells/mdl19-mod-assignment-type-mahara.git
+[submodule "mod/mahara"]
+	path = mod/mahara
+	url = git@github.com:agwells/mdl19-mod-mahara.git
