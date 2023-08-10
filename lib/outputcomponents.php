@@ -17,7 +17,7 @@
 /**
  * Classes representing HTML elements, used by $OUTPUT methods
  *
- * Please see http://docs.moodle.org/en/Developement:How_Moodle_outputs_HTML
+ * Please see https://docs.moodle.org/dev/How_Moodle_outputs_HTML
  * for an overview.
  *
  * @package core
