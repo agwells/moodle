@@ -1905,8 +1905,6 @@ class core_plugin_manager {
                 'database', 'standard',
             ),
 
-            'ltiservice' => array(),
-
             'ltixservice' => [
                 'basicoutcomes', 'gradebookservices', 'memberships', 'profile', 'toolproxy', 'toolsettings'
             ],
