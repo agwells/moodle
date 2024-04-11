@@ -863,26 +863,6 @@ function xmldb_main_upgrade($oldversion) {
 
         upgrade_main_savepoint(true, 2023120100.01);
     }
-    if ($oldversion < 2023122000.00) {
-        // Move mod_lti keys into new core lti config.
-        if (!empty(get_config('mod_lti', 'kid')) && !empty(get_config('mod_lti', 'privatekey'))) {
-            set_config('kid',  get_config('mod_lti', 'kid'), 'core_ltix');
-            set_config('privatekey',  get_config('mod_lti', 'privatekey'), 'core_ltix');
-            set_config('kid', null, 'mod_lti');
-            set_config('privatekey', null, 'mod_lti');
-        }
-
-        $servicetypes = ['basicoutcomes', 'gradebookservices', 'memberships','profile', 'toolproxy', 'toolsettings'];
-        foreach ($servicetypes as $type) {
-            $versionfile = $CFG->dirroot . "mod/lti/service/{$type}/version.php";
-
-            if (!file_exists($versionfile)) {
-                uninstall_plugin('ltiservice', $type);
-            }
-        }
-        // Main savepoint reached.
-        upgrade_main_savepoint(true, 2023122000.00);
-    }
 
     if ($oldversion < 2023121800.02) {
         // Define field attemptsavailable to be added to task_adhoc.
@@ -1164,7 +1144,27 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2024032600.01);
     }
 
-    if ($oldversion < 2024040200.01) {
+    if ($oldversion < 2024041100.00) {
+        // Move mod_lti keys into new core lti config.
+        if (!empty(get_config('mod_lti', 'kid')) && !empty(get_config('mod_lti', 'privatekey'))) {
+            set_config('kid',  get_config('mod_lti', 'kid'), 'core_ltix');
+            set_config('privatekey',  get_config('mod_lti', 'privatekey'), 'core_ltix');
+            set_config('kid', null, 'mod_lti');
+            set_config('privatekey', null, 'mod_lti');
+        }
+        upgrade_main_savepoint(true, 2024041100.00);
+    }
+
+    if ($oldversion < 2024041100.01) {
+        $ltiservice_subplugins = ['basicoutcomes', 'gradebookservices', 'memberships', 'profile', 'toolproxy', 'toolsettings'];
+
+        // Move all the service-specific type config for ltiservice_xx plugins to ltixservice_xx.
+        foreach ($ltiservice_subplugins as $subplugin) {
+            $oldsettingname = 'ltiservice_'.$subplugin;
+            $newsettingname = 'ltixservice'.$subplugin;
+            $DB->set_field('lti_types_config', 'name', $newsettingname, ['name' => $oldsettingname]);
+        }
+
         // Rename the ltiservice_gradebookservices table so that it's not removed during the uninstallation of that plugin.
         // This permits data migration to the replacement ltixservice_gradebookservices during that plugin's install.php.
 
@@ -1174,8 +1174,18 @@ function xmldb_main_upgrade($oldversion) {
         // Launch rename table for ltiservice_gradebookservices.
         $dbman->rename_table($table, 'tmp_ltiservice_gradebookservices');
 
+        // Uninstall old ltiservice subplugins (they'll later be reinstalled as
+        // ltixservice subplugins)
+        foreach ($ltiservice_subplugins as $subplugin) {
+            $versionfile = $CFG->dirroot . "mod/lti/service/{$subplugin}/version.php";
+
+            if (!file_exists($versionfile)) {
+                uninstall_plugin('ltiservice', $subplugin);
+            }
+        }
+
         // Main savepoint reached.
-        upgrade_main_savepoint(true, 2024040200.01);
+        upgrade_main_savepoint(true, 2024041100.01);
     }
 
     return true;
