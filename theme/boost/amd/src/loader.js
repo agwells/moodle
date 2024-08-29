@@ -106,6 +106,7 @@ enableTooltips();
 
 // Disables flipping the dropdowns up or dynamically repositioning them along the Y-axis (based on the viewport)
 // to prevent the dropdowns getting hidden behind the navbar or them covering the trigger element.
+// Also adjusts the positioning for RTL layouts.
 $.fn.dropdown.Constructor.Default.popperConfig = {
     modifiers: {
         flip: {
@@ -128,7 +129,26 @@ $.fn.dropdown.Constructor.Default.popperConfig = {
                 return data;
             },
             order: 301
-        }
+        },
+        rtl: {
+            enabled: window.right_to_left(),
+            fn: data => {
+                // Popper 1.0 is not smart enough to realize that in RTL mode
+                // "start" means right and "end" means left, so we have to
+                // swap them.
+                data.placement = data.placement.replace(
+                    /start|end/g,
+                    matched => matched === 'start' ? 'end' : 'start'
+                );
+                // Popper uses "position: absolute", "top: 0", and "left: 0" to
+                // calculate the offset for the popup. In RTL mode, if the popup
+                // happens to have a "right" positioning from other CSS class,
+                // it will override the "left" positioning and break the layout.
+                data.styles.right = 'auto';
+                return data;
+            },
+            order: 0
+        },
     },
 };
 
