@@ -546,6 +546,7 @@ $string['reverttodraftforstudent'] = 'Revert submission to draft for student: (i
 $string['reverttodraft'] = 'Revert the submission to draft status';
 $string['reverttodraftshort'] = 'Revert the submission to draft';
 $string['reviewed'] = 'Reviewed';
+$string['revokeattempt'] = 'Revoke attempt';
 $string['save'] = 'Save';
 $string['saveandcontinue'] = 'Save and continue';
 $string['savechanges'] = 'Save changes';

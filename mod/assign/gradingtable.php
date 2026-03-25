@@ -1244,15 +1244,23 @@ class assign_grading_table extends table_sql implements renderable {
                 $menu->add(new action_menu_link_secondary($baseactionurl, null, $description));
             }
 
-            if ($this->assignment->is_any_submission_plugin_enabled()) {
-                if ($USER->id != $row->id && $caneditsubmission && !empty($row->status)) {
-                    // Remove submission action link. This action link should be always placed as the last item
-                    // within the contextual menu.
-                    $baseactionurl->param('action', 'removesubmissionconfirm');
-                    $description = get_string('removesubmission', 'assign');
-                    $menu->add(new action_menu_link_secondary($baseactionurl, null, $description,
-                        ['class' => 'text-danger']));
+            if ($row->status == ASSIGN_SUBMISSION_STATUS_REOPENED) {
+                $baseactionurl->param('action', 'revokeattempt');
+                $description = get_string('revokeattempt', 'assign');
+                $menu->add(new action_menu_link_secondary($baseactionurl, null, $description));
+            } else {
+
+                if ($this->assignment->is_any_submission_plugin_enabled()) {
+                    if ($USER->id != $row->id && $caneditsubmission && !empty($row->status)) {
+                        // Remove submission action link. This action link should be always placed as the last item
+                        // within the contextual menu.
+                        $baseactionurl->param('action', 'removesubmissionconfirm');
+                        $description = get_string('removesubmission', 'assign');
+                        $menu->add(new action_menu_link_secondary($baseactionurl, null, $description,
+                            ['class' => 'text-danger']));
+                    }
                 }
+
             }
 
             $actionmenu = $this->output->render($menu);
@@ -1572,6 +1580,23 @@ class assign_grading_table extends table_sql implements renderable {
             $url = new moodle_url('/mod/assign/view.php', $urlparams);
             $description = get_string('addattempt', 'assign');
             $actions['addattempt'] = new action_menu_link_secondary(
+                $url,
+                $noimage,
+                $description
+            );
+        }
+
+        if ($row->status == ASSIGN_SUBMISSION_STATUS_REOPENED) {
+            $urlparams = ['id' => $this->assignment->get_course_module()->id,
+                          'userid' => $row->id,
+                          'action' => 'revokeattempt',
+                          'sesskey' => sesskey(),
+                          'page' => $this->currpage,
+                          'attempt' => $row->attemptnumber,
+                        ];
+            $url = new moodle_url('/mod/assign/view.php', $urlparams);
+            $description = get_string('revokeattempt', 'assign');
+            $actions['revokeattempt'] = new action_menu_link_secondary(
                 $url,
                 $noimage,
                 $description
